@@ -49,12 +49,12 @@ This project implements a machine learning solution to predict the Remaining Use
 
 ### Visualizations
 Two complementary plots demonstrate model behavior:
-1. **Raw Predictions** - Model Responsiveness to Sensor Data
-Image
-Shows model responsiveness to cycle-to-cycle sensor fluctuations, demonstrating real-time prediction capability
-2. **Smoothed Predictions** - Trend Analysis
-Image
-Rolling average applied to predictions highlights underlying degradation trends for maintenance planning
+#### Raw Predictions - Model Responsiveness to Sensor Data
+![Unsmoothed Predictions](raw.png)
+*Shows model responsiveness to cycle-to-cycle sensor fluctuations*
+#### Smoothed Predictions - Trend Analysis  
+![Smoothed Predictions](smooth.png)
+*Rolling average applied to predictions highlights underlying degradation trends*
 
 ### Key Visual Insights:
 - Model captures general degradation patterns across different engines
