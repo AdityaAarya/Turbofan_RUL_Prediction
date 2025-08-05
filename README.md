@@ -1,102 +1,108 @@
-# Fatigue Failure Prediction for Aircraft Turbofan Engines
-## Project Overview
-This project implements a predictive maintenance solution for aircraft turbofan engines using the NASA C-MAPSS dataset. The primary goal is to predict the Remaining Useful Life (RUL) of engines based on real-time sensor data. By accurately forecasting when an engine is likely to fail, this model enables proactive maintenance, which can prevent catastrophic failures, reduce operational downtime, and lower costs.
+# Aircraft Turbofan Engine RUL Prediction
 
-This project demonstrates a complete machine learning pipeline, from data preprocessing and feature engineering to model training, evaluation, and insightful visualization.
+## Project Overview
+This project implements a machine learning solution to predict the Remaining Useful Life (RUL) of aircraft turbofan engines using the NASA C-MAPSS dataset. The goal is to forecast engine failure based on sensor data, which can support predictive maintenance strategies in aerospace applications.
 
 ## Dataset
-The project uses the NASA Commercial Modular Aero-Propulsion System Simulation (C-MAPSS) dataset (FD001). The dataset consists of:
+**NASA C-MAPSS (Commercial Modular Aero-Propulsion System Simulation) - FD001**
+- **Training data**: 100 engines with complete operational history until failure
+- **Test data**: 100 engines with partial operational history  
+- **Features**: 21 sensor measurements and 3 operational settings per cycle
+- **Total data points**: ~33,700 sensor readings across all engines
 
-train_FD001.txt: Training data from 100 engines, with sensor readings from the start of operation until a point of failure.
+## Technical Approach
 
-test_FD001.txt: Test data from 100 engines, with sensor readings up to a random point before failure.
+### Data Preprocessing
+- Loaded space-separated text files and applied consistent column naming
+- Removed constant-value features (operational settings and low-variance sensors)
+- Calculated RUL for training data using linear countdown from max cycles to failure
+- Reconstructed RUL for test data using provided ground truth values
 
-RUL_FD001.txt: The true RUL values corresponding to the last recorded cycle of each engine in the test set.
+### Feature Engineering
+- **Rolling averages**: 10-cycle window to smooth sensor noise and capture trends
+- **Rate of change**: Calculated sensor value differences between consecutive cycles
+- Applied features to all sensor columns to capture degradation patterns
 
-Each data point (row) includes:
+### Model Implementation
+- **Algorithm**: Random Forest Regressor (100 estimators)
+- **Preprocessing**: StandardScaler normalization
+- **Training**: Fit on engineered features from training set
+- **Validation**: Evaluated on separate test set
 
-A unique engine ID (unit_number)
+### Post-Processing
+- Applied 5-cycle rolling average to predictions for trend visualization
+- Generated both raw and smoothed prediction plots for analysis
 
-The current operational cycle (time_in_cycles)
+## Results
 
-21 sensor measurements and 3 operational settings.
+### Model Performance
+| Evaluation Method | RMSE | R² Score |
+|-------------------|------|----------|
+| Full test set | 49.81 cycles | 0.29 |
+| Last cycle only | 34.25 cycles | 0.32 |
 
-## Methodology
-The project follows a robust machine learning workflow tailored for time-series data:
+### Key Observations
+- The model shows **moderate predictive capability** with R² of 0.29-0.32
+- **Better performance at end-of-life**: RMSE improves to 34.25 cycles when evaluating only the final cycle of each engine
+- Predictions capture general degradation trends but show variability in mid-life cycles
+- Rolling average smoothing helps visualize overall trends despite prediction noise
 
-Data Preprocessing:
+### Visualizations
+Two complementary plots demonstrate model behavior:
+1. **Raw Predictions** - Model Responsiveness to Sensor Data
+Image
+Shows model responsiveness to cycle-to-cycle sensor fluctuations, demonstrating real-time prediction capability
+2. **Smoothed Predictions** - Trend Analysis
+Image
+Rolling average applied to predictions highlights underlying degradation trends for maintenance planning
 
-The raw space-separated text files are loaded and cleaned.
+### Key Visual Insights:
+- Model captures general degradation patterns across different engines
+- Engine 20 shows particularly good prediction accuracy in later cycles
+- Smoothing reveals clearer trends while maintaining prediction validity
+- Raw predictions demonstrate model sensitivity to sensor variations
 
-Irrelevant features (e.g., operational settings with constant values and low-variance sensors) are removed to reduce noise and improve model efficiency.
+## Technical Skills Demonstrated
+- **Data pipeline development**: End-to-end preprocessing of time-series sensor data
+- **Feature engineering**: Created meaningful derived features from raw sensor readings  
+- **Machine learning**: Applied regression algorithms to complex multi-variate time-series
+- **Model evaluation**: Used appropriate metrics for regression performance assessment
+- **Data visualization**: Created informative plots for model interpretation
 
-RUL Calculation:
+## Implementation Details
+- **Languages/Libraries**: Python, pandas, numpy, scikit-learn, matplotlib
+- **Data handling**: Processed ~33K data points across multiple engines
+- **Feature space**: Expanded from 21 raw sensors to 63 engineered features
+- **Model training**: Utilized all available CPU cores for efficient Random Forest training
 
-Training Data: The RUL for each engine is calculated as a linear countdown from its maximum lifespan to 0.
+## Project Scope & Limitations
+- **Academic dataset**: Results based on simulated NASA data, not real operational data
+- **Single failure mode**: FD001 subset represents one specific failure scenario
+- **Model complexity**: Random Forest chosen for baseline performance; deep learning approaches could potentially improve results
+- **Evaluation context**: Performance should be assessed relative to operational requirements and safety margins
 
-Test Data: The provided RUL_FD001.txt file is used to determine the end-of-life for each test engine, and the RUL is then calculated for all preceding cycles.
+## Files Structure
+```
+├── train_FD001.txt    # Training dataset (NASA C-MAPSS)
+├── test_FD001.txt     # Test dataset  
+├── RUL_FD001.txt      # Ground truth RUL values
+└── main.py            # Complete implementation
+```
 
-Feature Engineering:
+## How to Run
+1. Download NASA C-MAPSS FD001 dataset files
+2. Place all .txt files in the same directory as the Python script
+3. Run the script to see training output, performance metrics, and visualizations
+4. Two plots will be generated showing prediction results
 
-Rolling Averages: A rolling mean (window size of 5 cycles) is calculated for each sensor. This technique smooths out sensor noise and helps the model identify long-term degradation trends more effectively.
+## Learning Outcomes
+This project provided hands-on experience with:
+- Time-series data preprocessing and feature engineering
+- Regression modeling for predictive maintenance applications
+- Model evaluation techniques for engineering applications
+- Balancing model complexity with interpretability
+- Visualizing time-series predictions effectively
 
-Rate of Change: The slope (or difference) of sensor readings is calculated to capture the rate of change, which can be a powerful indicator of a component's health declining rapidly.
+---
 
-Model Training:
-
-A Random Forest Regressor is chosen for its ability to handle high-dimensional data and capture complex, non-linear relationships without being overly sensitive to outliers.
-
-The model is trained on the engineered features from the training set.
-
-Prediction & Evaluation:
-
-The trained model generates RUL predictions for the test set.
-
-The model's performance is evaluated using Root Mean Squared Error (RMSE) and R-squared (R 
-2
- ) Score.
-
-Post-Processing & Visualization:
-
-The project deliberately generates two separate plots to showcase a deeper understanding of the model's output.
-
-The first plot shows the raw, unsmoothed predictions, which contain inherent "noise" from the sensor data. This demonstrates the model's responsiveness to real-time fluctuations.
-
-The second plot applies a rolling average to the predicted RUL values, creating a smoother trend line. This is a common post-processing step for building user-friendly dashboards and focusing on the long-term degradation trend, which is ideal for a predictive maintenance application.
-
-## Results & Visualizations
-The model's performance is strong, with predictions closely following the true RUL, especially as engines approach failure.
-
-Evaluation Metrics:
-
-RMSE at last cycle: (This value will be generated when you run the code)
-
-R-squared (R 
-2
- ): (This value will be generated when you run the code)
-
- Plot 1: Unsmoothed Predictions
-This plot shows the raw model output, highlighting how the predictions react to cycle-to-cycle variability in the sensor data.
-
-Plot 2: Smoothed Predictions
-This plot applies a rolling average to the predictions, providing a cleaner trend line that is easier for a human to interpret and use in a maintenance dashboard.
-
-## How to Run the Code
-Prerequisites: Ensure you have Python installed with pandas, numpy, scikit-learn, and matplotlib.
-
-Setup: Place the train_FD001.txt, test_FD001.txt, and RUL_FD001.txt files in the same directory as the Python script.
-
-Execution: Run the script from your terminal or a Jupyter/Colab notebook. The script will output the evaluation metrics and generate the two plots.
-
-## Skills Demonstrated
-Predictive Maintenance: Understanding and applying machine learning to an industry-specific problem.
-
-Data Science Pipeline: End-to-end implementation from data ingestion to model deployment and visualization.
-
-Feature Engineering: Creating meaningful features from raw time-series data.
-
-Model Selection: Choosing and training an appropriate model (RandomForestRegressor).
-
-Data Interpretation: Explaining complex model outputs (e.g., noisy predictions) and their real-world implications.
-
-Data Visualization: Using plots to effectively communicate model performance and insights.
+*Note: This is an educational/portfolio project using publicly available NASA simulation data. Results demonstrate technical competency in machine learning pipeline development and time-series analysis.*
